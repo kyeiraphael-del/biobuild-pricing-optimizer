@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BioBuild Pricing Optimizer</title>
+<meta name="description" content="Interactive pricing model for BioBuild: when is BioBuild cheaper than Johns Hopkins and Gladstone, what is the best price, and should BioBuild charge a flat fee or hourly?">
+<style>
+/* ============ BRAND COLORS (swap these to change the whole look) ============ */
+:root{
+  --navy:#0A1B33;
+  --navy-2:#102A4C;
+  --ink:#10243E;
+  --teal:#0E9F92;
+  --teal-2:#12B5A6;
+  --mint:#7CE3C0;
+  --blue:#2D5BD3;
+  --amber:#E8A33D;
+  --slate:#7A8CA5;
+  --green:#1FB67A;
+  --red:#E5484D;
+  --yellow:#F4C84A;
+  --bg:#F2F7FA;
+  --card:#FFFFFF;
+  --line:#DCE6EE;
+  --muted:#5B6F86;
+  --radius:18px;
+  --shadow:0 1px 2px rgba(10,27,51,.06),0 10px 30px rgba(10,27,51,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;line-height:1.2}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+/* ============ HERO ============ */
+.hero{position:relative;overflow:hidden;color:#fff;background:radial-gradient(1200px 500px at 85% -10%,rgba(18,181,166,.45),transparent 60%),radial-gradient(800px 400px at 0% 110%,rgba(45,91,211,.45),transparent 60%),linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 100%);padding:34px 0 86px}
+.hero svg.helix{position:absolute;right:-40px;top:-20px;height:130%;opacity:.22;pointer-events:none}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;z-index:2}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.2px;font-size:1.25rem}
+.brand .mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--teal-2),var(--mint));display:grid;place-items:center;box-shadow:0 6px 18px rgba(18,181,166,.45)}
+.brand small{display:block;font-weight:500;font-size:.72rem;opacity:.7;letter-spacing:.14em;text-transform:uppercase}
+.btn{border:0;border-radius:12px;padding:10px 16px;font-weight:700;transition:transform .15s,box-shadow .15s,background .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn.ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.28)}
+.btn.ghost:hover{background:rgba(255,255,255,.2)}
+.btn.primary{background:linear-gradient(135deg,var(--teal-2),var(--teal));color:#fff;box-shadow:0 8px 20px rgba(14,159,146,.35)}
+.btn.soft{background:#EAF3F7;color:var(--ink);border:1px solid var(--line)}
+.btn.soft:hover{background:#DFEDF3}
+.hero-copy{position:relative;z-index:2;margin-top:46px;max-width:760px}
+.eyebrow{display:inline-block;padding:6px 12px;border-radius:99px;background:rgba(124,227,192,.15);border:1px solid rgba(124,227,192,.4);color:var(--mint);font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.hero h1{font-size:clamp(2rem,4.6vw,3.4rem);margin:16px 0 12px;font-weight:800;letter-spacing:-.02em}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--mint),#9FD3FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:1.08rem;opacity:.86;max-width:640px;margin:0}
+
+/* ============ LAYOUT ============ */
+main{margin-top:-56px;position:relative;z-index:3;padding-bottom:60px}
+.tabs{position:sticky;top:0;z-index:20;display:flex;gap:6px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:16px;padding:6px;box-shadow:var(--shadow);overflow-x:auto;margin-bottom:22px}
+.tab{flex:1;white-space:nowrap;border:0;background:transparent;border-radius:11px;padding:11px 16px;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:8px}
+.tab:hover{background:#EEF5F8;color:var(--ink)}
+.tab.active{background:linear-gradient(135deg,var(--navy),var(--navy-2));color:#fff;box-shadow:0 6px 16px rgba(10,27,51,.28)}
+.tab .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:rgba(127,150,170,.2);font-size:.74rem}
+.tab.active .n{background:var(--teal-2);color:#fff}
+.panel{display:none;animation:fade .35s ease}
+.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:22px}
+.card h2{font-size:1.3rem;margin-bottom:4px}
+.card .sub{color:var(--muted);margin:0 0 16px;font-size:.96rem}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr}.g2{grid-template-columns:1fr}}
+@media(max-width:520px){.g4{grid-template-columns:1fr}}
+
+/* ============ VERDICT + KPI ============ */
+.verdict{display:flex;gap:18px;align-items:flex-start;border-radius:var(--radius);padding:22px 24px;margin-bottom:22px;color:#fff;background:linear-gradient(135deg,var(--teal),#0B7A8F 60%,var(--blue));box-shadow:0 14px 34px rgba(14,159,146,.3)}
+.verdict .ic{flex:0 0 48px;height:48px;border-radius:14px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:1.5rem}
+.verdict h2{font-size:1.35rem;margin-bottom:6px}
+.verdict p{margin:0;opacity:.94}
+.kpi{border-radius:16px;padding:18px;background:linear-gradient(180deg,#fff,#F6FBFC);border:1px solid var(--line);position:relative;overflow:hidden}
+.kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--teal-2)}
+.kpi.warn:before{background:var(--amber)}
+.kpi.bad:before{background:var(--red)}
+.kpi .lab{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.kpi .val{font-size:2rem;font-weight:800;margin:4px 0 2px;letter-spacing:-.02em}
+.kpi .note{font-size:.86rem;color:var(--muted)}
+
+/* ============ TABLES ============ */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.93rem;background:#fff}
+th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal;min-width:240px}
+thead th{background:var(--navy);color:#fff;font-weight:700;font-size:.82rem;letter-spacing:.03em;border-bottom:0}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:#F7FBFC}
+tr.sec td{background:#EAF3F7;font-weight:800;color:var(--navy);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+td.best{background:#DDF6EC!important;color:#0A6B49;font-weight:800}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-weight:700;font-size:.8rem}
+.pill.ok{background:#D8F4E7;color:#0A6B49}
+.pill.mid{background:#FFF0C7;color:#8A5A00}
+.pill.bad{background:#FDE0E1;color:#A3191F}
+.neg{color:#B3261E}.pos{color:#0A6B49}
+
+/* ============ INPUTS ============ */
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:700;font-size:.9rem}
+.field .hint{font-size:.8rem;color:var(--muted)}
+.inp{position:relative}
+.inp input{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid #CFE0EA;background:#FFFBEA;color:#1746B8;font-weight:700;font:inherit;font-weight:700;transition:border .15s,box-shadow .15s}
+.inp input:focus{outline:0;border-color:var(--teal-2);box-shadow:0 0 0 4px rgba(18,181,166,.18)}
+.inp.pre input{padding-left:26px}.inp.suf input{padding-right:34px}
+.inp .pf,.inp .sf{position:absolute;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;pointer-events:none}
+.inp .pf{left:11px}.inp .sf{right:12px}
+.inp input.mini{padding:9px 8px;text-align:center}
+.scen-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.scen-grid .h{font-size:.76rem;font-weight:800;color:var(--navy);text-align:center;background:#EAF3F7;padding:6px;border-radius:9px}
+@media(max-width:820px){.scen-grid{grid-template-columns:repeat(3,1fr)}}
+.rowlab{font-weight:800;margin:18px 0 8px}
+.warnbox{background:#FFF4D6;border:1px solid #F0D58A;color:#7A5200;border-radius:12px;padding:10px 14px;font-size:.9rem;margin-top:10px;display:none}
+.warnbox.show{display:block}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+
+/* ============ HEATMAP ============ */
+.heat td,.heat th{text-align:center;min-width:64px;padding:9px 6px;font-variant-numeric:tabular-nums}
+.heat th:first-child,.heat td:first-child{text-align:center;min-width:90px}
+.heat tbody th{color:#fff;font-weight:800}
+.grid>*{min-width:0}
+.g2 table,.g3 table{min-width:0}
+.g2 th:first-child,.g2 td:first-child{min-width:0}
+.heat td.cell{font-weight:700;font-size:.85rem;color:#0B2A20;border:1px solid #fff}
+.heat td.cur,.heat th.cur{outline:3px solid var(--navy);outline-offset:-3px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 0;font-size:.86rem;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px}
+
+/* ============ CHARTS ============ */
+.chart{width:100%;height:auto;display:block}
+.chart text{font-family:inherit;fill:var(--muted);font-size:11px}
+.chart .axis{stroke:var(--line)}
+.chart .lbl{font-weight:700;fill:var(--ink)}
+.chart-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.86rem;margin-top:6px}
+.chart-legend span i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.bar{transition:opacity .15s}.bar:hover{opacity:.8}
+
+/* ============ MODAL ============ */
+.modal{position:fixed;inset:0;background:rgba(6,16,32,.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal.show{display:flex}
+.sheet{background:#fff;border-radius:22px;max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.sheet h2{font-size:1.5rem;margin-bottom:6px}
+.sheet h3{margin:20px 0 6px;font-size:1.05rem;color:var(--teal)}
+.sheet p,.sheet li{color:#2B3F57}
+.sheet code{background:#EEF5F8;padding:2px 7px;border-radius:7px;font-size:.9rem}
+.close{float:right;background:#EEF5F8;border:0;width:36px;height:36px;border-radius:50%;font-size:1.2rem}
+.check td,.check th{padding:7px 10px}
+
+footer{color:var(--muted);text-align:center;font-size:.85rem;padding:10px 0 40px}
+.tip{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#E3EEF4;color:var(--navy);font-size:.72rem;font-weight:800;cursor:help;margin-left:6px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <svg class="helix" viewBox="0 0 300 700" fill="none" aria-hidden="true">
+    <defs><linearGradient id="hg" x1="0" x2="1"><stop offset="0" stop-color="#7CE3C0"/><stop offset="1" stop-color="#2D5BD3"/></linearGradient></defs>
+    <g stroke="url(#hg)" stroke-width="3" stroke-linecap="round">
+      <path d="M60 0 C 260 90, 40 170, 240 260 S 60 430, 240 520 S 60 640, 240 700"/>
+      <path d="M240 0 C 40 90, 260 170, 60 260 S 240 430, 60 520 S 240 640, 60 700"/>
+      <g opacity=".7"><line x1="95" y1="40" x2="205" y2="40"/><line x1="130" y1="95" x2="170" y2="95"/><line x1="100" y1="150" x2="200" y2="150"/><line x1="105" y1="215" x2="195" y2="215"/><line x1="140" y1="265" x2="160" y2="265"/><line x1="105" y1="320" x2="195" y2="320"/><line x1="100" y1="385" x2="200" y2="385"/><line x1="135" y1="440" x2="165" y2="440"/><line x1="100" y1="495" x2="200" y2="495"/><line x1="110" y1="560" x2="190" y2="560"/><line x1="140" y1="610" x2="160" y2="610"/></g>
+    </g>
+  </svg>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M7 3c0 6 10 6 10 12s-10 6-10 6"/><path d="M17 3c0 6-10 6-10 12s10 6 10 6"/><path d="M8.5 7h7M8.5 17h7" opacity=".8"/></svg></div>
+        <div>BioBuild<small>Pricing Optimizer</small></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn ghost" id="btnHow">How it works</button>
+      </div>
+    </div>
+    <div class="hero-copy">
+      <span class="eyebrow">Business Analytics · Group 4</span>
+      <h1>What is the <em>best price</em> for BioBuild to charge?</h1>
+      <p>Change any number and see, instantly, when BioBuild is cheaper than Johns Hopkins and Gladstone, the highest price that still wins the customer, and whether a flat fee or an hourly rate is smarter.</p>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="overview"><span class="n">1</span>Overview</button>
+    <button class="tab" data-tab="assumptions"><span class="n">2</span>Assumptions</button>
+    <button class="tab" data-tab="optimization"><span class="n">3</span>Optimization</button>
+    <button class="tab" data-tab="sensitivity"><span class="n">4</span>Sensitivity</button>
+    <button class="tab" data-tab="flat"><span class="n">5</span>Flat vs Hourly</button>
+  </nav>
+
+  <section class="panel active" id="p-overview"></section>
+  <section class="panel" id="p-assumptions"></section>
+  <section class="panel" id="p-optimization"></section>
+  <section class="panel" id="p-sensitivity"></section>
+  <section class="panel" id="p-flat"></section>
+
+  <footer>BioBuild Pricing Optimizer · built from the group's Excel model · all numbers are assumptions you can edit, nothing is saved or sent anywhere.</footer>
+</main>
+
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+
+<script>
+/* ============================================================
+   1. THE MODEL  (a line-by-line copy of the Excel workbook)
+   ============================================================ */
+const SC = ['Simple: Low','Simple: Base','Simple: High','Larger: Low','Larger: Base','Larger: High'];
+
+const BASE = {
+  savings: 0.15,          // Assumptions!C6  required customer savings
+  rate: 80,               // C9  BioBuild hourly rate
+  jhuRate: 125,           // C10 Johns Hopkins hourly rate
+  glRate: 330,            // C11 Gladstone hourly rate
+  opCost: 50,             // C12 BioBuild cost per analyst hour
+  fees: 0,                // C13 core facility extra fees
+  flat: [700, 3000],      // C16:D16 flat fee simple / larger
+  hours: [5,7.5,10,30,40,50],            // C19:H19
+  jhuMult: [0.8,0.8,0.8,0.66,0.66,0.66], // C20:H20
+  glMult:  [0.75,0.75,0.75,0.5,0.5,0.5], // C21:H21
+  rateStart: 50, rateStep: 10,           // C24, C25
+  multStart: 0.2, multStep: 0.1,         // C26, C27
+  probs: [0.25,0.5,0.25,0.25,0.5,0.25],  // C30:H30
+  pctStart: 0.8, pctStep: 0.1            // C33, C34
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+
+function compute(s){
+  const o = {};
+  const f = 1 + s.fees;
+  o.bbH = s.hours.slice();
+  o.jhuH = s.hours.map((h,i)=>h*s.jhuMult[i]);
+  o.glH  = s.hours.map((h,i)=>h*s.glMult[i]);
+  o.bbHourly = s.hours.map(h=>h*s.rate);
+  o.bbFlat = s.hours.map((h,i)=> i<3 ? s.flat[0] : s.flat[1]);
+  o.jhu = o.jhuH.map(h=>h*s.jhuRate*f);
+  o.gl  = o.glH.map(h=>h*s.glRate*f);
+  o.cheap = o.jhu.map((v,i)=>Math.min(v,o.gl[i]));
+  o.saveH = o.cheap.map((c,i)=> c===0 ? 0 : (c-o.bbHourly[i])/c);
+  o.saveF = o.cheap.map((c,i)=> c===0 ? 0 : (c-o.bbFlat[i])/c);
+  const status = v => v>=s.savings ? 'Cheaper' : (v>0 ? 'Slightly cheaper' : 'More expensive');
+  o.statH = o.saveH.map(status);
+  o.statF = o.saveF.map(status);
+  o.bestRate = o.cheap.map((c,i)=> s.hours[i]===0 ? 0 : (1-s.savings)*c/s.hours[i]);
+  o.dRate = o.bestRate.map(v=>v-s.rate);
+  o.bestFlat = o.cheap.map(c=>(1-s.savings)*c);
+  o.dFlat = o.bestFlat.map((v,i)=>v-(i<3?s.flat[0]:s.flat[1]));
+  o.profitable = o.bestRate.map(v=> v>s.opCost);
+  // how fast can a competitor be
+  o.speed = {
+    jhuStill: s.rate/(s.jhuRate*f),
+    jhuTarget: s.rate/((1-s.savings)*s.jhuRate*f),
+    glStill: s.rate/(s.glRate*f),
+    glTarget: s.rate/((1-s.savings)*s.glRate*f)
+  };
+  o.cntH = o.saveH.filter(v=>v>0).length;
+  o.cntF = o.saveF.filter(v=>v>0).length;
+  o.cntP = o.profitable.filter(Boolean).length;
+  o.cntHT = o.saveH.filter(v=>v>=s.savings-1e-9).length;
+  o.cntFT = o.saveF.filter(v=>v>=s.savings-1e-9).length;
+
+  // sensitivity heat maps (9 rows x 10 columns)
+  const rows = Array.from({length:9},(_,i)=>s.rateStart+i*s.rateStep);
+  const cols = Array.from({length:10},(_,i)=>s.multStart+i*s.multStep);
+  o.sensRows = rows; o.sensCols = cols;
+  o.sensJ = rows.map(r=>cols.map(m=>1 - r/(s.jhuRate*f*m)));
+  o.sensG = rows.map(r=>cols.map(m=>1 - r/(s.glRate*f*m)));
+
+  // flat vs hourly
+  const grp = (a,b,c)=>{
+    const p=[s.probs[a],s.probs[b],s.probs[c]];
+    const h=[s.hours[a],s.hours[b],s.hours[c]];
+    const cheap = o.cheap[b];                     // cheapest competitor at BASE hours
+    const rate = h[1]===0 ? 0 : (1-s.savings)*cheap/h[1];
+    const fee  = (1-s.savings)*cheap;
+    const dot = (x)=>x.reduce((t,v,i)=>t+v*p[i],0);
+    const hCost = h.map(v=>rate*v);
+    const hSave = hCost.map(v=>cheap===0?0:(cheap-v)/cheap);
+    const hProf = h.map(v=>(rate-s.opCost)*v);
+    const fCost = h.map(()=>fee);
+    const fSave = fCost.map(v=>cheap===0?0:(cheap-v)/cheap);
+    const fProf = h.map(v=>fee-s.opCost*v);
+    const diff = dot(fProf)-dot(hProf);
+    const lossP = p.reduce((t,pi,i)=>t+(fProf[i]<0?pi:0),0);
+    const missP = p.reduce((t,pi,i)=>t+(hSave[i]<s.savings-0.00001?pi:0),0);
+    const rec = diff>0.005 ? 'Flat fee' : (diff<-0.005 ? 'Hourly' : (lossP===0 ? 'Flat fee' : 'Hourly'));
+    const pcts = Array.from({length:5},(_,i)=>s.pctStart+i*s.pctStep);
+    return {p,h,cheap,rate,fee,hCost,hSave,hProf,fCost,fSave,fProf,
+      expH:{cost:dot(hCost),save:dot(hSave),prof:dot(hProf)},
+      expF:{cost:dot(fCost),save:dot(fSave),prof:dot(fProf)},
+      expHours:dot(h), probSum:p.reduce((a,b)=>a+b,0),
+      diff,lossP,missP,worstF:Math.min(...fProf),worstH:Math.min(...hSave),rec,
+      pcts, earns:pcts.map(x=>rate*h[1]*(1-x))};
+  };
+  o.fvhS = grp(0,1,2);
+  o.fvhL = grp(3,4,5);
+  return o;
+}
+
+/* ============================================================
+   2. SMALL HELPERS
+   ============================================================ */
+const $ = (id)=>document.getElementById(id);
+const money = (v,d=0)=>{ if(!isFinite(v)) return '–'; v=Math.round(v*1e6)/1e6+0; if(Math.abs(v)<1e-9) v=0; const a=Math.abs(v); const t=a.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}); return (v<0?'-$':'$')+t; };
+const pct = (v,d=1)=> isFinite(v) ? (v*100).toFixed(d)+'%' : '–';
+const num = (v,d=2)=> isFinite(v) ? (+v).toFixed(d).replace(/\.?0+$/,'') : '–';
+const signMoney = (v,d=0)=> { v=Math.round(v*1e6)/1e6+0; return (v>0?'+':'')+money(v,d); };
+const pill = st => `<span class="pill ${st==='Cheaper'?'ok':st==='Slightly cheaper'?'mid':'bad'}">${st}</span>`;
+const pcol = v => v<-1e-9 ? 'neg' : '';
+
+let S = clone(BASE);
+let R = compute(S);
+
+/* ============================================================
+   3. CHARTS (plain SVG, no libraries)
+   ============================================================ */
+function barChart({cats, series, title, fmt=(v)=>money(v), h=330, yLabel=''}){
+  const W=860,H=h,L=62,Rr=16,T=22,B=44;
+  const iw=W-L-Rr, ih=H-T-B;
+  const all = series.flatMap(s=>s.values);
+  let max = Math.max(...all,1), min = Math.min(...all,0);
+  const span = (max-min)||1;
+  const niceMax = max + span*0.08;
+  const niceMin = min<0 ? min - span*0.08 : 0;
+  const y = v => T + ih - (v-niceMin)/(niceMax-niceMin)*ih;
+  const gw = iw/cats.length, bw = Math.min(34,(gw*0.78)/series.length);
+  let g='';
+  for(let i=0;i<=4;i++){
+    const v = niceMin + (niceMax-niceMin)*i/4, yy=y(v);
+    g+=`<line class="axis" x1="${L}" x2="${W-Rr}" y1="${yy}" y2="${yy}"/><text x="${L-8}" y="${yy+4}" text-anchor="end">${fmt(v)}</text>`;
+  }
+  if(niceMin<0) g+=`<line x1="${L}" x2="${W-Rr}" y1="${y(0)}" y2="${y(0)}" stroke="#9FB2C4"/>`;
+  cats.forEach((c,ci)=>{
+    const x0 = L + ci*gw + (gw - bw*series.length)/2;
+    series.forEach((s,si)=>{
+      const v=s.values[ci], yy=y(Math.max(v,0)), hh=Math.abs(y(v)-y(0));
+      g+=`<rect class="bar" x="${x0+si*bw}" y="${v>=0?y(v):y(0)}" width="${bw-3}" height="${Math.max(hh,1)}" rx="5" fill="${s.color}"><title>${s.name} · ${c}: ${fmt(v)}</title></rect>`;
+    });
+    g+=`<text class="lbl" x="${L+ci*gw+gw/2}" y="${H-18}" text-anchor="middle">${c}</text>`;
+  });
+  const leg = series.map(s=>`<span><i style="background:${s.color}"></i>${s.name}</span>`).join('');
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}">${g}</svg><div class="chart-legend">${leg}</div>`;
+}
+
+/* ============================================================
+   4. PANELS
+   ============================================================ */
+function renderOverview(){
+  const r=R, s=S;
+  // headline
+  let head, body, icon;
+  if(r.cntHT===6){ icon='🏆'; head='BioBuild wins every scenario with hourly pricing.'; }
+  else if(r.cntH===6){ icon='✅'; head=`BioBuild is cheaper in all 6 scenarios, and meets the ${pct(s.savings,0)} savings target in ${r.cntHT} of 6.`; }
+  else if(r.cntH>0){ icon='⚖️'; head=`BioBuild is cheaper in ${r.cntH} of 6 scenarios with hourly pricing.`; }
+  else { icon='⚠️'; head='With these numbers BioBuild is not cheaper in any scenario.'; }
+  body = `Customers switch only if they save at least <b>${pct(s.savings,0)}</b> versus the cheapest competitor. At <b>${money(s.rate)}/hr</b> BioBuild meets that target in <b>${r.cntHT} of 6</b> hourly scenarios and <b>${r.cntFT} of 6</b> flat-fee scenarios. BioBuild can win <i>and</i> still cover its ${money(s.opCost)}/hr cost in <b>${r.cntP} of 6</b>.`;
+
+  const kpi = (lab,val,note,cls='')=>`<div class="kpi ${cls}"><div class="lab">${lab}</div><div class="val">${val}</div><div class="note">${note}</div></div>`;
+  const best = (a)=>Math.min(...a), bestMax=(a)=>Math.max(...a);
+  const k = [
+    kpi('Hourly: cheaper in', `${r.cntH} / 6`, 'scenarios vs. cheapest competitor', r.cntH>=5?'':r.cntH>=3?'warn':'bad'),
+    kpi('Flat fee: cheaper in', `${r.cntF} / 6`, 'scenarios vs. cheapest competitor', r.cntF>=5?'':r.cntF>=3?'warn':'bad'),
+    kpi('Wins and profits in', `${r.cntP} / 6`, `best rate above ${money(s.opCost)}/hr cost`, r.cntP>=5?'':r.cntP>=3?'warn':'bad'),
+    kpi('Best price (Simple, base)', `${money(r.bestRate[1],2)}/hr`, `or ${money(r.bestFlat[1])} flat · now ${money(s.rate)}/hr`),
+  ].join('');
+
+  const chart = barChart({
+    cats:SC, title:'What the customer pays per project',
+    series:[
+      {name:'BioBuild (hourly)',color:'#0E9F92',values:r.bbHourly},
+      {name:'BioBuild (flat fee)',color:'#2D5BD3',values:r.bbFlat},
+      {name:'Johns Hopkins',color:'#E8A33D',values:r.jhu},
+      {name:'Gladstone',color:'#7A8CA5',values:r.gl},
+    ]});
+
+  const recS = r.fvhS.rec, recL=r.fvhL.rec;
+  $('p-overview').innerHTML = `
+    <div class="verdict"><div class="ic">${icon}</div><div><h2>${head}</h2><p>${body}</p></div></div>
+    <div class="grid g4" style="margin-bottom:22px">${k}</div>
+    <div class="card">
+      <h2>What the customer pays for one project</h2>
+      <p class="sub">Shorter bar = cheaper for the customer. BioBuild needs to sit lower than the cheapest competitor, by at least your savings target.</p>
+      ${chart}
+    </div>
+    <div class="grid g2">
+      <div class="card" style="margin-bottom:0">
+        <h2>Which price should BioBuild quote?</h2>
+        <p class="sub">The highest price that still leaves the customer with the savings target (base hours).</p>
+        <div class="tbl-wrap"><table><thead><tr><th></th><th>Simple task</th><th>Larger project</th></tr></thead><tbody>
+          <tr><td>Best hourly rate</td><td><b>${money(r.fvhS.rate,2)}/hr</b></td><td><b>${money(r.fvhL.rate,2)}/hr</b></td></tr>
+          <tr><td>Best flat fee</td><td><b>${money(r.fvhS.fee,2)}</b></td><td><b>${money(r.fvhL.fee,2)}</b></td></tr>
+          <tr><td>Recommended structure</td><td><b>${recS}</b></td><td><b>${recL}</b></td></tr>
+        </tbody></table></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <h2>How fast can a competitor be?</h2>
+        <p class="sub">If a competitor finishes in less time than this share of BioBuild's hours, BioBuild costs more.</p>
+        <div class="tbl-wrap"><table><thead><tr><th></th><th>Still cheaper</th><th>Saves ${pct(s.savings,0)}</th></tr></thead><tbody>
+          <tr><td>Johns Hopkins</td><td><b>${num(r.speed.jhuStill)}×</b></td><td><b>${num(r.speed.jhuTarget)}×</b></td></tr>
+          <tr><td>Gladstone</td><td><b>${num(r.speed.glStill)}×</b></td><td><b>${num(r.speed.glTarget)}×</b></td></tr>
+        </tbody></table></div>
+        <p class="sub" style="margin-top:10px">Example: ${num(r.speed.jhuTarget)}× means Johns Hopkins can use up to ${pct(r.speed.jhuTarget,0)} of BioBuild's hours before BioBuild stops saving the customer ${pct(s.savings,0)}.</p>
+      </div>
+    </div>`;
+}
+
+function field(id,label,val,{pre='',suf='',step='any',hint=''}={}){
+  return `<div class="field"><label for="${id}">${label}</label>
+    <div class="inp ${pre?'pre':''} ${suf?'suf':''}">${pre?`<span class="pf">${pre}</span>`:''}<input id="${id}" type="number" inputmode="decimal" step="${step}" value="${val}" data-key="${id}">${suf?`<span class="sf">${suf}</span>`:''}</div>
+    ${hint?`<div class="hint">${hint}</div>`:''}</div>`;
+}
+function sixRow(key,vals,{mult=false,percent=false}={}){
+  return `<div class="scen-grid">` + SC.map((n,i)=>`<div><div class="h">${n}</div><div class="inp ${percent?'suf':''}"><input class="mini" type="number" inputmode="decimal" step="any" data-arr="${key}" data-i="${i}" value="${percent?+(vals[i]*100).toFixed(4):vals[i]}">${percent?'<span class="sf">%</span>':''}</div></div>`).join('') + `</div>`;
+}
+
+function buildAssumptions(){
+  $('p-assumptions').innerHTML = `
+    <div class="card">
+      <h2>Assumptions</h2>
+      <p class="sub">Yellow boxes are the numbers you can change. Everything else on the site updates the moment you type.</p>
+      <div class="actions">
+        <button class="btn soft" id="btnReset">↺ Reset to the Excel base case</button>
+        <button class="btn soft" id="btn10">Set savings target to 10% (team meeting)</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>1 · The customer's decision</h2>
+      <div class="grid g3" style="margin-top:12px">
+        ${field('savings','Required customer savings',+(S.savings*100).toFixed(4),{suf:'%',hint:'How much cheaper BioBuild must be to win the customer. 0% = just needs to be cheaper.'})}
+        ${field('opCost','BioBuild cost per analyst hour',S.opCost,{pre:'$',hint:'What an hour of analyst time costs BioBuild. Used for the profit check.'})}
+        ${field('fees','Core facility extra fees',+(S.fees*100).toFixed(4),{suf:'%',hint:'Optional surcharge the cores add on top of their hourly cost.'})}
+      </div>
+    </div>
+    <div class="card">
+      <h2>2 · Hourly rates ($ per hour)</h2>
+      <div class="grid g3" style="margin-top:12px">
+        ${field('rate','BioBuild hourly rate',S.rate,{pre:'$'})}
+        ${field('jhuRate','Johns Hopkins Integrated Genomics Center',S.jhuRate,{pre:'$'})}
+        ${field('glRate','Gladstone Bioinformatics Core (external)',S.glRate,{pre:'$'})}
+      </div>
+    </div>
+    <div class="card">
+      <h2>3 · BioBuild flat fee per project</h2>
+      <p class="sub">An alternative to hourly pricing. The same fee is used in the Low, Base and High scenarios.</p>
+      <div class="grid g2">
+        ${field('flat0','Simple task',S.flat[0],{pre:'$'})}
+        ${field('flat1','Larger project',S.flat[1],{pre:'$'})}
+      </div>
+    </div>
+    <div class="card">
+      <h2>4 · Hours per project</h2>
+      <p class="sub">How long BioBuild takes, and how fast each competitor is compared with BioBuild (1.00× = same hours, 0.50× = twice as fast).</p>
+      <div class="rowlab">BioBuild hours per project</div>${sixRow('hours',S.hours)}
+      <div class="rowlab">Johns Hopkins hours as a multiple of BioBuild hours</div>${sixRow('jhuMult',S.jhuMult)}
+      <div class="rowlab">Gladstone hours as a multiple of BioBuild hours</div>${sixRow('glMult',S.glMult)}
+    </div>
+    <div class="card">
+      <h2>5 · How likely is each hours scenario?</h2>
+      <p class="sub">Used on the Flat vs Hourly page. Each group (Simple, Larger) must add up to 100%.</p>
+      ${sixRow('probs',S.probs,{percent:true})}
+      <div class="warnbox" id="probWarn"></div>
+    </div>
+    <div class="card">
+      <h2>6 · Table settings (advanced)</h2>
+      <div class="grid g4" style="margin-top:12px">
+        ${field('rateStart','Heat map: first BioBuild rate',S.rateStart,{pre:'$'})}
+        ${field('rateStep','Heat map: rate step',S.rateStep,{pre:'$'})}
+        ${field('multStart','Heat map: first hours multiple',S.multStart,{suf:'×'})}
+        ${field('multStep','Heat map: multiple step',S.multStep,{suf:'×'})}
+        ${field('pctStart','Flat vs Hourly: first "hours vs. priced" %',+(S.pctStart*100).toFixed(4),{suf:'%'})}
+        ${field('pctStep','Flat vs Hourly: step',+(S.pctStep*100).toFixed(4),{suf:'%'})}
+      </div>
+    </div>`;
+  $('btnReset').onclick = ()=>{ S=clone(BASE); buildAssumptions(); wireInputs(); update(); };
+  $('btn10').onclick = ()=>{ S.savings=0.10; buildAssumptions(); wireInputs(); update(); };
+}
+
+const PCT_KEYS = new Set(['savings','fees','pctStart','pctStep']);
+function wireInputs(){
+  document.querySelectorAll('#p-assumptions input').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const v = parseFloat(inp.value);
+      if(!isFinite(v)) return;
+      if(inp.dataset.arr){
+        const k=inp.dataset.arr, i=+inp.dataset.i;
+        S[k][i] = (k==='probs') ? v/100 : v;
+      } else {
+        const k=inp.dataset.key;
+        if(k==='flat0') S.flat[0]=v; else if(k==='flat1') S.flat[1]=v;
+        else S[k] = PCT_KEYS.has(k) ? v/100 : v;
+      }
+      update();
+    });
+  });
+}
+
+function renderOptimization(){
+  const r=R,s=S;
+  const row=(label,arr,f,extra=()=>'')=>`<tr><td>${label}</td>${arr.map((v,i)=>`<td class="${extra(i,v)}">${f(v,i)}</td>`).join('')}</tr>`;
+  const cheapestIs = i=>{ const vals=[r.bbHourly[i],r.bbFlat[i],r.jhu[i],r.gl[i]]; return Math.min(...vals); };
+  const head = `<thead><tr><th></th>${SC.map(n=>`<th>${n}</th>`).join('')}</tr></thead>`;
+  $('p-optimization').innerHTML = `
+    <div class="card">
+      <h2>When is BioBuild cheaper?</h2>
+      <p class="sub">Six scenarios: a simple task and a larger project, each with Low, Base and High hours. A <b style="color:#0A6B49">green cell</b> is the cheapest option for the customer.</p>
+      <div class="tbl-wrap"><table>${head}<tbody>
+        <tr class="sec"><td colspan="7">Hours worked</td></tr>
+        ${row('BioBuild hours',r.bbH,v=>num(v))}
+        ${row('Johns Hopkins hours',r.jhuH,v=>num(v))}
+        ${row('Gladstone hours',r.glH,v=>num(v))}
+        <tr class="sec"><td colspan="7">Cost to the customer ($ per project)</td></tr>
+        ${row('BioBuild (hourly rate)',r.bbHourly,v=>money(v),(i,v)=>Math.abs(v-cheapestIs(i))<1e-9?'best':'')}
+        ${row('BioBuild (flat fee)',r.bbFlat,v=>money(v),(i,v)=>Math.abs(v-cheapestIs(i))<1e-9?'best':'')}
+        ${row('Johns Hopkins',r.jhu,v=>money(v),(i,v)=>Math.abs(v-cheapestIs(i))<1e-9?'best':'')}
+        ${row('Gladstone',r.gl,v=>money(v),(i,v)=>Math.abs(v-cheapestIs(i))<1e-9?'best':'')}
+        ${row('<b>Cheapest competitor</b>',r.cheap,v=>`<b>${money(v)}</b>`)}
+        <tr class="sec"><td colspan="7">How much does the customer save with BioBuild?</td></tr>
+        ${row('Hourly pricing: % saved',r.saveH,v=>pct(v),(i,v)=>v<0?'neg':'')}
+        ${row('Hourly pricing: is BioBuild cheaper?',r.statH,pill)}
+        ${row('Flat fee: % saved',r.saveF,v=>pct(v),(i,v)=>v<0?'neg':'')}
+        ${row('Flat fee: is BioBuild cheaper?',r.statF,pill)}
+      </tbody></table></div>
+      <p class="sub" style="margin-top:10px"><b>Cheaper</b> = saves at least ${pct(s.savings,0)}. <b>Slightly cheaper</b> = saves something, but less than the target. <b>More expensive</b> = costs more than the competitor.</p>
+    </div>
+
+    <div class="card">
+      <h2>Best price for BioBuild</h2>
+      <p class="sub">The most BioBuild can charge while the customer still saves ${pct(s.savings,0)} against the cheapest competitor. Charge more and you lose the customer. Charge less and you leave money on the table.</p>
+      <div class="tbl-wrap"><table>${head}<tbody>
+        ${row('Best hourly rate ($/hr)',r.bestRate,v=>`<b>${money(v,2)}</b>`)}
+        ${row('Change from current rate',r.dRate,v=>signMoney(v,2),(i,v)=>pcol(v))}
+        ${row('Best flat fee ($)',r.bestFlat,v=>`<b>${money(v,2)}</b>`)}
+        ${row('Change from current flat fee',r.dFlat,v=>signMoney(v,2),(i,v)=>pcol(v))}
+        ${row('Can BioBuild win and still make a profit?',r.profitable,v=>`<span class="pill ${v?'ok':'bad'}">${v?'Yes':'No'}</span>`)}
+      </tbody></table></div>
+      <p class="sub" style="margin-top:10px">If the best rate is below BioBuild's ${money(s.opCost)}/hr cost, BioBuild cannot win that scenario and make a profit. Negative change means "lower the price".</p>
+      <div style="margin-top:14px">${barChart({
+        cats:SC,title:'Best hourly rate versus current rate',fmt:v=>money(v),h:300,
+        series:[{name:'Best hourly rate',color:'#0E9F92',values:r.bestRate},{name:`Current rate (${money(s.rate)})`,color:'#C7D3DF',values:SC.map(()=>s.rate)},{name:`BioBuild cost (${money(s.opCost)})`,color:'#E5484D',values:SC.map(()=>s.opCost)}]})}</div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card" style="margin-bottom:0">
+        <h2>How fast can a competitor be?</h2>
+        <p class="sub">At BioBuild's current hourly rate, as a multiple of BioBuild's hours.</p>
+        <div class="tbl-wrap"><table><thead><tr><th></th><th>Still cheaper</th><th>Saves ${pct(s.savings,0)}</th></tr></thead><tbody>
+          <tr><td>Johns Hopkins</td><td><b>${num(r.speed.jhuStill)}×</b></td><td><b>${num(r.speed.jhuTarget)}×</b></td></tr>
+          <tr><td>Gladstone</td><td><b>${num(r.speed.glStill)}×</b></td><td><b>${num(r.speed.glTarget)}×</b></td></tr>
+        </tbody></table></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <h2>Summary</h2>
+        <p class="sub">Out of 6 scenarios.</p>
+        <div class="tbl-wrap"><table><tbody>
+          <tr><td>BioBuild cheaper with hourly pricing</td><td><b>${r.cntH}</b></td></tr>
+          <tr><td>BioBuild cheaper with its flat fee</td><td><b>${r.cntF}</b></td></tr>
+          <tr><td>BioBuild can win and still make a profit</td><td><b>${r.cntP}</b></td></tr>
+        </tbody></table></div>
+      </div>
+    </div>`;
+}
+
+function heat(v,t){
+  // red (<=0), yellow (0..target), green (>=target); stronger color further from the edge
+  if(v>=t-1e-9){ const k=Math.min(1,(v-t)/0.4); const a=0.30+0.55*k; return `rgba(31,182,122,${a.toFixed(2)})`; }
+  if(v>0){ const k=v/Math.max(t,1e-9); return `rgba(244,200,74,${(0.35+0.4*k).toFixed(2)})`; }
+  const k=Math.min(1,-v/1.0); return `rgba(229,72,77,${(0.25+0.55*k).toFixed(2)})`;
+}
+function heatTable(rows,cols,data,t,rateNow,label){
+  return `<div class="tbl-wrap"><table class="heat"><thead><tr><th>${label}</th>${cols.map(c=>`<th>${num(c)}×</th>`).join('')}</tr></thead><tbody>
+    ${rows.map((rv,i)=>`<tr><th style="background:${Math.abs(rv-rateNow)<1e-9?'var(--teal)':'var(--navy-2)'}">${money(rv)}</th>${data[i].map((v,j)=>`<td class="cell" style="background:${heat(v,t)}" title="${money(rv)}/hr at ${num(cols[j])}× hours: customer saves ${pct(v)}">${(v*100).toFixed(0)}%</td>`).join('')}</tr>`).join('')}
+  </tbody></table></div>`;
+}
+function renderSensitivity(){
+  const r=R,s=S;
+  const leg=`<div class="legend"><span><i style="background:rgba(31,182,122,.65)"></i>Meets the ${pct(s.savings,0)} target</span><span><i style="background:rgba(244,200,74,.6)"></i>Cheaper, but below target</span><span><i style="background:rgba(229,72,77,.55)"></i>BioBuild costs more</span><span>Teal row label = your current rate</span></div>`;
+  $('p-sensitivity').innerHTML = `
+    <div class="card">
+      <h2>Sensitivity: where is BioBuild cheaper?</h2>
+      <p class="sub">Each box shows the customer's savings. Rows are BioBuild's hourly rate. Columns are how many hours the competitor needs, as a multiple of BioBuild's hours (0.5× = competitor is twice as fast). Change the grid on the Assumptions page.</p>
+      ${leg}
+    </div>
+    <div class="card"><h2>1 · Versus Johns Hopkins</h2><p class="sub">Customer savings (%). Rows: BioBuild hourly rate. Columns: Johns Hopkins hours as a multiple of BioBuild hours.</p>
+      ${heatTable(r.sensRows,r.sensCols,r.sensJ,s.savings,s.rate,'BioBuild $/hr ↓  ·  JHU hours →')}</div>
+    <div class="card"><h2>2 · Versus Gladstone</h2><p class="sub">Customer savings (%). Rows: BioBuild hourly rate. Columns: Gladstone hours as a multiple of BioBuild hours.</p>
+      ${heatTable(r.sensRows,r.sensCols,r.sensG,s.savings,s.rate,'BioBuild $/hr ↓  ·  Gladstone hours →')}</div>`;
+}
+
+function fvhBlock(name,g){
+  const col=['Low','Base','High'];
+  const rows=(lab,arr,f,cls=()=>'')=>`<tr><td>${lab}</td>${arr.map((v,i)=>`<td class="${cls(v)}">${f(v)}</td>`).join('')}</tr>`;
+  return `<div class="card">
+    <h2>${name}</h2>
+    <p class="sub">Prices that just meet the savings target at base hours: <b>${money(g.rate,2)}/hr</b> or a <b>${money(g.fee,2)}</b> flat fee.</p>
+    <div class="tbl-wrap"><table><thead><tr><th></th>${col.map(c=>`<th>${c}</th>`).join('')}<th>Expected</th></tr></thead><tbody>
+      <tr class="sec"><td colspan="5">Setup</td></tr>
+      <tr><td>Chance of scenario</td>${g.p.map(v=>`<td>${pct(v,0)}</td>`).join('')}<td>${pct(g.probSum,0)}</td></tr>
+      <tr><td>Actual BioBuild hours</td>${g.h.map(v=>`<td>${num(v)}</td>`).join('')}<td>${num(g.expHours)}</td></tr>
+      <tr><td>Cheapest competitor cost (base hours)</td>${g.h.map(()=>`<td>${money(g.cheap)}</td>`).join('')}<td>${money(g.cheap)}</td></tr>
+      <tr class="sec"><td colspan="5">If BioBuild bills hourly</td></tr>
+      <tr><td>Customer cost</td>${g.hCost.map(v=>`<td>${money(v,2)}</td>`).join('')}<td>${money(g.expH.cost,2)}</td></tr>
+      <tr><td>Customer saves vs. cheapest competitor</td>${g.hSave.map(v=>`<td class="${pcol(v)}">${pct(v)}</td>`).join('')}<td>${pct(g.expH.save)}</td></tr>
+      <tr><td>BioBuild profit</td>${g.hProf.map(v=>`<td class="${pcol(v)}">${money(v,2)}</td>`).join('')}<td>${money(g.expH.prof,2)}</td></tr>
+      <tr class="sec"><td colspan="5">If BioBuild charges a flat fee</td></tr>
+      <tr><td>Customer cost</td>${g.fCost.map(v=>`<td>${money(v,2)}</td>`).join('')}<td>${money(g.expF.cost,2)}</td></tr>
+      <tr><td>Customer saves vs. cheapest competitor</td>${g.fSave.map(v=>`<td class="${pcol(v)}">${pct(v)}</td>`).join('')}<td>${pct(g.expF.save)}</td></tr>
+      <tr><td>BioBuild profit</td>${g.fProf.map(v=>`<td class="${pcol(v)}">${money(v,2)}</td>`).join('')}<td>${money(g.expF.prof,2)}</td></tr>
+    </tbody></table></div>
+    <div class="grid g4" style="margin-top:16px">
+      <div class="kpi"><div class="lab">Flat fee minus hourly</div><div class="val ${pcol(g.diff)}">${signMoney(g.diff,2)}</div><div class="note">expected profit per project</div></div>
+      <div class="kpi ${g.lossP>0?'bad':''}"><div class="lab">Chance of a loss (flat)</div><div class="val">${pct(g.lossP,0)}</div><div class="note">worst case ${money(g.worstF,2)}</div></div>
+      <div class="kpi ${g.missP>0?'warn':''}"><div class="lab">Customer misses target (hourly)</div><div class="val">${pct(g.missP,0)}</div><div class="note">worst case saves ${pct(g.worstH)}</div></div>
+      <div class="kpi"><div class="lab">Recommended</div><div class="val">${g.rec}</div><div class="note">higher expected profit wins</div></div>
+    </div>
+  </div>`;
+}
+function renderFlat(){
+  const r=R,s=S, a=r.fvhS, b=r.fvhL;
+  const earns=(lab,g)=>`<tr><td>${lab}</td>${g.earns.map(v=>`<td class="${v>0.005?'best':v<-0.005?'':''}" style="${v<-0.005?'background:#FFF0C7':''}">${money(v,2)}</td>`).join('')}</tr>`;
+  $('p-flat').innerHTML = `
+    <div class="card">
+      <h2>Flat fee or hourly: which should BioBuild choose?</h2>
+      <p class="sub">With a flat fee, <b>BioBuild</b> carries the risk if a job takes longer than planned. With hourly, the <b>customer</b> carries it. Both prices below just meet the savings target at base hours.</p>
+      <div class="tbl-wrap"><table><thead><tr><th></th><th>Simple task</th><th>Larger project</th></tr></thead><tbody>
+        <tr><td>Recommended pricing structure</td><td><span class="pill ok">${a.rec}</span></td><td><span class="pill ok">${b.rec}</span></td></tr>
+        <tr><td>Best hourly rate ($/hr)</td><td><b>${money(a.rate,2)}</b></td><td><b>${money(b.rate,2)}</b></td></tr>
+        <tr><td>Best flat fee ($)</td><td><b>${money(a.fee,2)}</b></td><td><b>${money(b.fee,2)}</b></td></tr>
+        <tr><td>Chance BioBuild loses money with a flat fee</td><td>${pct(a.lossP,0)}</td><td>${pct(b.lossP,0)}</td></tr>
+        <tr><td>Chance customer misses the savings target with hourly</td><td>${pct(a.missP,0)}</td><td>${pct(b.missP,0)}</td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="card">
+      <h2>When does a flat fee earn more than hourly?</h2>
+      <p class="sub">Columns: BioBuild's expected hours as a % of the hours it priced on. <b style="color:#0A6B49">Green</b> = flat fee earns more. <b style="color:#8A5A00">Yellow</b> = hourly earns more. A flat fee wins only if BioBuild expects to finish faster than it priced.</p>
+      <div class="tbl-wrap"><table><thead><tr><th>Expected hours as % of priced hours</th>${a.pcts.map(p=>`<th>${pct(p,0)}</th>`).join('')}</tr></thead><tbody>
+        ${earns('Simple task: flat fee earns this much more ($/project)',a)}
+        ${earns('Larger project: flat fee earns this much more ($/project)',b)}
+      </tbody></table></div>
+    </div>
+    <div class="card">
+      <h2>BioBuild profit by scenario</h2>
+      <p class="sub">Flat fee profit drops as jobs run long. Hourly profit grows with the hours worked.</p>
+      ${barChart({cats:SC,title:'BioBuild profit per project',h:310,fmt:v=>money(v),series:[
+        {name:'Hourly',color:'#0E9F92',values:[...a.hProf,...b.hProf]},
+        {name:'Flat fee',color:'#2D5BD3',values:[...a.fProf,...b.fProf]}]})}
+    </div>
+    ${fvhBlock('Simple task: the details',a)}
+    ${fvhBlock('Larger project: the details',b)}`;
+}
+
+/* ============================================================
+   5. UPDATE LOOP + PROBABILITY CHECK
+   ============================================================ */
+function checkProbs(){
+  const w=$('probWarn'); if(!w) return;
+  const a=S.probs[0]+S.probs[1]+S.probs[2], b=S.probs[3]+S.probs[4]+S.probs[5];
+  const bad=[]; if(Math.abs(a-1)>1e-6) bad.push(`Simple adds up to ${pct(a,1)}`); if(Math.abs(b-1)>1e-6) bad.push(`Larger adds up to ${pct(b,1)}`);
+  w.className='warnbox'+(bad.length?' show':''); w.textContent = bad.length ? `Heads up: ${bad.join(' and ')}. Each group should add up to 100% for the Flat vs Hourly results to be exact.` : '';
+}
+function update(){
+  R = compute(S);
+  renderOverview(); renderOptimization(); renderSensitivity(); renderFlat(); checkProbs();
+}
+
+/* ============================================================
+   6. TABS + "HOW IT WORKS" + BASE-CASE TEST
+   ============================================================ */
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===t));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='p-'+t.dataset.tab));
+  window.scrollTo({top:document.querySelector('main').offsetTop-70,behavior:'smooth'});
+}));
+
+// Values read from the Excel workbook (base case) used to prove the website matches the model
+const EXCEL = {
+  cheap:[500,750,1000,2475,3300,4125],
+  saveH:[0.2,0.2,0.2,0.030303,0.030303,0.030303],
+  saveF:[-0.4,0.066667,0.3,-0.212121,0.090909,0.272727],
+  bestRate:[85,85,85,70.125,70.125,70.125],
+  bestFlat:[425,637.5,850,2103.75,2805,3506.25],
+  cntH:6,cntF:4,cntP:6,
+  jhuTarget:0.752941, glTarget:0.285205,
+  sRate:85, lRate:70.125, sFee:637.5, lFee:2805, sMiss:0.25, lMiss:0.25, sWorst:137.5, lWorst:305
+};
+function isBase(){ return JSON.stringify(S)===JSON.stringify(BASE); }
+function testRows(){
+  const b = compute(clone(BASE));
+  const close=(a,c)=>Math.abs(a-c)<1e-4*Math.max(1,Math.abs(c));
+  const arr=(a,c)=>a.every((v,i)=>close(v,c[i]));
+  return [
+    ['Cheapest competitor (6 scenarios)', arr(b.cheap,EXCEL.cheap)],
+    ['Customer savings, hourly', arr(b.saveH,EXCEL.saveH)],
+    ['Customer savings, flat fee', arr(b.saveF,EXCEL.saveF)],
+    ['Best hourly rate', arr(b.bestRate,EXCEL.bestRate)],
+    ['Best flat fee', arr(b.bestFlat,EXCEL.bestFlat)],
+    ['Scenario counts (6 / 4 / 6)', b.cntH===EXCEL.cntH && b.cntF===EXCEL.cntF && b.cntP===EXCEL.cntP],
+    ['Competitor speed limits (JHU, Gladstone)', close(b.speed.jhuTarget,EXCEL.jhuTarget)&&close(b.speed.glTarget,EXCEL.glTarget)],
+    ['Flat vs Hourly: best prices', close(b.fvhS.rate,EXCEL.sRate)&&close(b.fvhL.rate,EXCEL.lRate)&&close(b.fvhS.fee,EXCEL.sFee)&&close(b.fvhL.fee,EXCEL.lFee)],
+    ['Flat vs Hourly: risks and worst cases', close(b.fvhS.missP,EXCEL.sMiss)&&close(b.fvhL.missP,EXCEL.lMiss)&&close(b.fvhS.worstF,EXCEL.sWorst)&&close(b.fvhL.worstF,EXCEL.lWorst)],
+    ['Sensitivity maps (corner cells)', close(b.sensJ[0][0],-1)&&close(b.sensJ[8][9],0.054545)&&close(b.sensG[8][0],-0.969697)&&close(b.sensG[8][9],0.641873)],
+  ];
+}
+function openHow(){
+  const t=testRows(); const allOk=t.every(x=>x[1]);
+  $('sheet').innerHTML = `<button class="close" id="xClose" aria-label="Close">×</button>
+    <h2>How this works</h2>
+    <p>This website is a copy of the group's Excel model. Type in a yellow box and everything recalculates right away, just like changing a cell in Excel.</p>
+    <h3>The big idea</h3>
+    <p>BioBuild wants to charge as much as it can, but a customer only switches if they save at least the <b>target %</b> compared with the cheapest competitor. So the best price is the <b>highest price that still gives the customer that saving</b>.</p>
+    <p><code>Best hourly rate = (1 − target) × cheapest competitor cost ÷ BioBuild hours</code><br><code>Best flat fee = (1 − target) × cheapest competitor cost</code></p>
+    <h3>The five pages</h3>
+    <ul>
+      <li><b>Overview:</b> the answer in plain words, with a chart.</li>
+      <li><b>Assumptions:</b> every number you can change.</li>
+      <li><b>Optimization:</b> costs, savings, best prices, and whether BioBuild still makes a profit.</li>
+      <li><b>Sensitivity:</b> colored maps showing where BioBuild wins as its rate and the competitor's speed change.</li>
+      <li><b>Flat vs Hourly:</b> which structure is better when BioBuild's real hours are uncertain.</li>
+    </ul>
+    <h3>Memory cue</h3>
+    <p>Green = the customer saves enough. Yellow = cheaper but not enough. Red = BioBuild costs more.</p>
+    <h3>Base-case test against the Excel file</h3>
+    <p>${allOk?'✅ Every key number on this website matches the Excel workbook at the base case.':'⚠️ Some numbers do not match the workbook.'}</p>
+    <div class="tbl-wrap"><table class="check"><tbody>${t.map(x=>`<tr><td>${x[0]}</td><td>${x[1]?'<span class="pill ok">Matches Excel</span>':'<span class="pill bad">Mismatch</span>'}</td></tr>`).join('')}</tbody></table></div>
+    <p style="margin-top:12px;font-size:.9rem">The test always runs on the original base case, even if you have changed the boxes.${isBase()?'':' You are currently looking at changed numbers.'}</p>
+    <h3>Good to know</h3>
+    <ul>
+      <li>Nothing you type is saved or sent anywhere. Refresh the page to go back to the base case.</li>
+      <li>The numbers are team assumptions and public price information, so it is safe to host publicly.</li>
+    </ul>`;
+  $('modal').classList.add('show');
+  $('xClose').onclick=()=>$('modal').classList.remove('show');
+}
+$('btnHow').onclick=openHow;
+$('modal').addEventListener('click',e=>{ if(e.target.id==='modal') $('modal').classList.remove('show'); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('modal').classList.remove('show'); });
+
+buildAssumptions(); wireInputs(); update();
+</script>
+</body>
+</html>
