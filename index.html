@@ -89,7 +89,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .ticks{display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted)}
 
 /* ============ LAYOUT ============ */
-main{padding:34px 0 40px}
+main{padding:28px 0 40px}
 section.blk{margin-bottom:46px}
 .sec-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
 .sec-ic{flex:0 0 52px;height:52px;border-radius:15px;display:grid;place-items:center;font-size:1.7rem;color:#fff;background:linear-gradient(135deg,var(--teal),var(--blue));box-shadow:0 10px 24px rgba(14,159,146,.3)}
@@ -194,6 +194,28 @@ details.adv summary small{display:block;color:var(--muted);font-weight:500;font-
 .sheet code{background:#EEF5F8;padding:2px 7px;border-radius:7px;font-size:.9rem}
 .close{float:right;background:#EEF5F8;border:0;width:36px;height:36px;border-radius:50%;font-size:1.2rem}
 .check td,.check th{padding:7px 10px}
+.hero{padding:22px 0 34px}
+.hero-grid{margin-top:6px}
+.scene{max-height:250px}
+.hero h1{margin-top:0}
+.accs{margin-top:26px}
+.calc th,.calc td{padding:10px 8px}
+.calc th:first-child,.calc td:first-child{white-space:nowrap;padding-left:12px}
+.calc>.card:first-child{position:sticky;top:16px}
+@media(max-width:1000px){.calc>.card:first-child{position:relative}}
+.accs details.adv{margin-bottom:14px}
+.adv .body .card{box-shadow:none}
+.adv .body .card.deco:after{display:none}
+.ans{padding:22px 24px;margin-bottom:18px;border-left:6px solid var(--teal-2)}
+.ans.mid{border-left-color:var(--amber)}.ans.bad{border-left-color:var(--red)}
+.ans h3{font-size:1.3rem;margin-bottom:4px}
+.ans p.lead{margin:0 0 16px;color:var(--muted)}
+.tile{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:linear-gradient(180deg,#fff,#F6FBFC)}
+.tile .lab{font-size:.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.tile .big{font-size:2.3rem;font-weight:800;letter-spacing:-.02em;color:var(--navy);margin:4px 0 0;line-height:1.1}
+.tile .big small{font-size:1rem;color:var(--muted);font-weight:700}
+.tile .alt{font-weight:700;color:var(--teal);margin-bottom:10px}
+.tile .rec{font-size:.86rem;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 footer{color:var(--muted);text-align:center;font-size:.85rem;padding:10px 0 40px}
 </style>
 </head>
@@ -214,26 +236,14 @@ footer{color:var(--muted);text-align:center;font-size:.85rem;padding:10px 0 40px
 <header class="hero">
   <div class="wrap">
     <div class="topbar">
-      <div class="brand">
-        <div class="mark"><svg class="ic" style="font-size:22px;color:#fff"><use href="#i-dna"/></svg></div>
-        <div>BioBuild<small>Pricing Optimizer</small></div>
-      </div>
+      <div class="brand"><div class="mark"><svg class="ic" style="font-size:22px;color:#fff"><use href="#i-dna"/></svg></div></div>
       <button class="btn ghost" id="btnHow">How it works</button>
     </div>
-
     <div class="hero-grid">
       <div>
-        <span class="eyebrow"><svg class="ic"><use href="#i-flask"/></svg> Business Analytics · Group 4</span>
-        <h1>What is the <em>best price</em> for BioBuild to charge?</h1>
-        <p>Type your numbers and see right away when BioBuild is cheaper than Johns Hopkins and Gladstone, the highest price that still wins the customer, and whether a flat fee or hourly rate is smarter.</p>
-        <div class="chips">
-          <span class="chip"><svg class="ic"><use href="#i-beaker"/></svg>Live results</span>
-          <span class="chip"><svg class="ic"><use href="#i-dna"/></svg>Built from our Excel model</span>
-          <span class="chip"><svg class="ic"><use href="#i-dish"/></svg>Change any number</span>
-        </div>
+        <h1>BioBuild Pricing Optimizer</h1>
+        <p>Enter your target rate and savings goal to find the highest price BioBuild can charge while still undercutting Johns Hopkins and Gladstone.</p>
       </div>
-
-      <!-- laboratory scene -->
       <svg class="scene" viewBox="0 0 560 360" aria-hidden="true">
         <defs>
           <linearGradient id="liq" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7CE3C0"/><stop offset="1" stop-color="#0E9F92"/></linearGradient>
@@ -317,71 +327,36 @@ footer{color:var(--muted);text-align:center;font-size:.85rem;padding:10px 0 40px
   </div>
 </header>
 
-<nav class="bar" id="bar">
-  <div class="wrap">
-    <div class="navs"><span class="live" id="barLive"></span></div>
-    <div class="savebox"><span class="t">Savings target</span><div class="seg" data-seg></div></div>
-  </div>
-</nav>
-
 <main class="wrap">
-
-  <!-- ===== 1. CALCULATOR ===== -->
-  <section class="blk" id="s-calc">
-    <div class="sec-head"><div class="sec-ic"><svg class="ic"><use href="#i-flask"/></svg></div>
-      <div><h2>Choose your numbers, see the outcome</h2><p>Change anything on the left. The answer on the right updates instantly.</p></div></div>
-    <div class="calc">
-      <div class="card deco" style="margin-bottom:0">
-        <h3>Your numbers</h3>
-        <p class="sub">The most important inputs. More are in "Advanced" below.</p>
-        <div class="stack" id="inputs"></div>
-        <div style="margin-top:16px"><button class="btn soft" id="btnReset">↺ Reset to the Excel base case</button></div>
-      </div>
-      <div id="answer"></div>
+  <div class="calc">
+    <div class="card deco" style="margin-bottom:0">
+      <h3>Your inputs</h3>
+      <div class="stack" id="inputs" style="margin-top:14px"></div>
+      <div style="margin-top:16px"><button class="btn soft" id="btnReset">↺ Reset to base case</button></div>
     </div>
-  </section>
+    <div id="answer"></div>
+  </div>
 
-  <details class="card adv" id="advWrap" style="margin-bottom:46px">
-    <summary><span class="adv-ic"><svg class="ic"><use href="#i-hex"/></svg></span>
-      <span>Advanced assumptions<small>Hours per project, how fast each competitor is, scenario chances, table settings</small></span>
-      <svg class="ic ch" style="font-size:22px"><use href="#i-chev"/></svg></summary>
-    <div class="body" id="advanced"></div>
-  </details>
+  <div class="accs">
+  <details class="card adv" id="advWrap">
+    <summary><span class="adv-ic"><svg class="ic"><use href="#i-hex"/></svg></span><span>Advanced assumptions<small>Competitor rates, flat fees, hours, scenario chances, table settings</small></span><svg class="ic ch" style="font-size:22px"><use href="#i-chev"/></svg></summary>
+    <div class="body"><div id="advanced"></div></div></details>
+  
+  <details class="card adv" id="flatWrap">
+    <summary><span class="adv-ic"><svg class="ic"><use href="#i-micro"/></svg></span><span>Flat fee vs. hourly<small>Which structure is better when real hours are uncertain</small></span><svg class="ic ch" style="font-size:22px"><use href="#i-chev"/></svg></summary>
+    <div class="body"><div id="flat"></div></div></details>
+  
+  <details class="card adv" id="s-wins">
+    <summary><span class="adv-ic"><svg class="ic"><use href="#i-dish"/></svg></span><span>Sensitivity maps<small>BioBuild rate vs. competitor speed</small></span><svg class="ic ch" style="font-size:22px"><use href="#i-chev"/></svg></summary>
+    <div class="body"><div id="wins"></div></div></details>
+  
+  <details class="card adv" id="detailWrap">
+    <summary><span class="adv-ic"><svg class="ic"><use href="#i-beaker"/></svg></span><span>Detailed breakdown<small>Costs, savings, best prices and competitor speed limits for all six scenarios</small></span><svg class="ic ch" style="font-size:22px"><use href="#i-chev"/></svg></summary>
+    <div class="body"><div id="cheapest"></div><div id="price"></div></div></details>
+  
+  </div>
 
-  <!-- ===== 2. WHO IS CHEAPEST ===== -->
-  <section class="blk" id="s-cheapest">
-    <div class="sec-head"><div class="sec-ic"><svg class="ic"><use href="#i-beaker"/></svg></div>
-      <div><h2>All six scenarios</h2><p>A simple task and a larger project, each with Low, Base and High hours. Updates with your numbers.</p></div></div>
-    <div id="cheapest"></div>
-  </section>
-
-  <div class="dna-div"></div>
-
-  <!-- ===== 3. BEST PRICE ===== -->
-  <section class="blk" id="s-price">
-    <div class="sec-head"><div class="sec-ic"><svg class="ic"><use href="#i-tube"/></svg></div>
-      <div><h2>What is the best price to charge?</h2><p>The highest price that still leaves the customer with the savings target.</p></div></div>
-    <div id="price"></div>
-  </section>
-
-  <div class="dna-div"></div>
-
-  <!-- ===== 4. WHERE BIOBUILD WINS ===== -->
-  <details class="card adv" id="s-wins" style="margin-bottom:46px">
-    <summary><span class="adv-ic"><svg class="ic"><use href="#i-dish"/></svg></span>
-      <span>Sensitivity maps (optional)<small>Colored grids: BioBuild's hourly rate against how fast Johns Hopkins or Gladstone is</small></span>
-      <svg class="ic ch" style="font-size:22px"><use href="#i-chev"/></svg></summary>
-    <div class="body" id="wins"></div>
-  </details>
-
-  <!-- ===== 5. FLAT VS HOURLY ===== -->
-  <section class="blk" id="s-flat">
-    <div class="sec-head"><div class="sec-ic"><svg class="ic"><use href="#i-micro"/></svg></div>
-      <div><h2>Flat fee or hourly?</h2><p>Which pricing structure is better when BioBuild's real hours are uncertain.</p></div></div>
-    <div id="flat"></div>
-  </section>
-
-  <footer>BioBuild Pricing Optimizer · built from the group's Excel model · all numbers are assumptions you can edit, nothing is saved or sent anywhere.</footer>
+  <footer>BioBuild Pricing Optimizer · Group 4 Business Analytics Model · nothing you type is saved or sent anywhere.</footer>
 </main>
 
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
@@ -558,32 +533,27 @@ function sixRow(key,vals,{percent=false}={}){
 function buildInputs(){
   $('inputs').innerHTML = `
     <div class="field"><div class="lbl-row"><label>Customer must save at least</label><div class="seg light" data-seg></div></div>
-      <div class="hint">How much cheaper BioBuild must be than the cheapest competitor to win the customer.</div>
-      <div id="customWrap" style="display:none;gap:10px;align-items:center"><div class="inp suf" style="flex:1"><input id="savings" type="number" inputmode="decimal" step="any" value="${+(S.savings*100).toFixed(4)}" data-key="savings"><span class="sf">%</span></div><span class="hint">Type any % you like</span></div></div>
-    ${field('rate','BioBuild hourly rate',S.rate,{pre:'$',hint:'What BioBuild charges per hour. Drag the slider or type.'})}
+      <div id="customWrap" style="display:none;gap:10px;align-items:center"><div class="inp suf" style="flex:1"><input id="savings" type="number" inputmode="decimal" step="any" value="${+(S.savings*100).toFixed(4)}" data-key="savings"><span class="sf">%</span></div></div></div>
+    ${field('rate','BioBuild hourly rate',S.rate,{pre:'$'})}
     <input type="range" id="rateSl" data-key="rate" min="30" max="200" step="1" value="${S.rate}" aria-label="BioBuild hourly rate slider" style="margin-top:-8px">
-    <div class="two">
+    <div class="field"><label for="speed">Competitor hours vs. plan: <span class="big" id="speedLab" style="color:var(--teal)"></span></label>
+      <input type="range" id="speed" data-key="speed" min="0.4" max="1.6" step="0.05" value="${S.speed}" aria-label="Competitor hours scale">
+      <div class="ticks"><span>40% (faster)</span><span>100%</span><span>160% (slower)</span></div></div>`;
+  $('advanced').innerHTML = `
+    <div class="rowlab" style="margin-top:4px">Rates, fees and costs</div>
+    <div class="grid g4">
       ${field('jhuRate','Johns Hopkins $/hr',S.jhuRate,{pre:'$'})}
       ${field('glRate','Gladstone $/hr',S.glRate,{pre:'$'})}
-    </div>
-    <div class="two">
       ${field('flat0','Flat fee: simple task',S.flat[0],{pre:'$'})}
       ${field('flat1','Flat fee: larger project',S.flat[1],{pre:'$'})}
-    </div>
-    ${field('opCost','BioBuild cost per analyst hour',S.opCost,{pre:'$',hint:'Used to check BioBuild still makes a profit.'})}
-    <div class="whatif"><h4>${ico('flask')} What if competitors are faster or slower?</h4>
-      <div class="hint" style="margin-bottom:4px">Speeds all competitor hours up or down at once. Now: <span class="big" id="speedLab"></span></div>
-      <input type="range" id="speed" data-key="speed" min="0.4" max="1.6" step="0.05" value="${S.speed}" aria-label="Competitor hours scale">
-      <div class="ticks"><span>40% (much faster)</span><span>100% = plan</span><span>160% (slower)</span></div></div>`;
-  $('advanced').innerHTML = `
-    <div class="grid g3" style="margin-top:4px">
-      ${field('fees','Core facility extra fees',+(S.fees*100).toFixed(4),{suf:'%',hint:'Optional surcharge the cores add on top of their hourly cost.'})}
+      ${field('opCost','BioBuild cost per analyst hour',S.opCost,{pre:'$',hint:'Used to check BioBuild still makes a profit.'})}
+      ${field('fees','Core facility extra fees',+(S.fees*100).toFixed(4),{suf:'%'})}
     </div>
     <div class="rowlab">BioBuild hours per project</div>${sixRow('hours',S.hours)}
     <div class="rowlab">Johns Hopkins hours as a multiple of BioBuild hours</div>${sixRow('jhuMult',S.jhuMult)}
     <div class="rowlab">Gladstone hours as a multiple of BioBuild hours</div>${sixRow('glMult',S.glMult)}
     <p class="hint" style="margin:8px 0 0">1.00× = same hours as BioBuild. 0.50× = the competitor is twice as fast.</p>
-    <div class="rowlab">How likely is each hours scenario? (each group must add up to 100%)</div>${sixRow('probs',S.probs,{percent:true})}
+    <div class="rowlab">Chance of each hours scenario (each group must add up to 100%)</div>${sixRow('probs',S.probs,{percent:true})}
     <div class="warnbox" id="probWarn"></div>
     <div class="rowlab">Table settings</div>
     <div class="grid g4">
@@ -621,29 +591,28 @@ $('btnReset').onclick = ()=>{ S=clone(BASE); customOpen=false; buildInputs(); up
    ============================================================ */
 function renderAnswer(){
   const r=R, s=S;
-  let head, icon;
-  if(r.cntHT===6){ icon='🏆'; head='BioBuild wins every scenario with hourly pricing.'; }
-  else if(r.cntH===6){ icon='✅'; head=`BioBuild is cheaper in all 6 scenarios, and meets the ${pct(s.savings,0)} savings target in ${r.cntHT} of 6.`; }
-  else if(r.cntH>0){ icon='⚖️'; head=`BioBuild is cheaper in ${r.cntH} of 6 scenarios with hourly pricing.`; }
-  else { icon='⚠️'; head='With these numbers BioBuild is not cheaper in any scenario.'; }
-  const body = `Customers switch only if they save at least <b>${pct(s.savings,0)}</b> versus the cheapest competitor. At <b>${money(s.rate)}/hr</b> BioBuild meets that target in <b>${r.cntHT} of 6</b> hourly scenarios and <b>${r.cntFT} of 6</b> flat-fee scenarios. BioBuild can win <i>and</i> still cover its ${money(s.opCost)}/hr cost in <b>${r.cntP} of 6</b>.`;
-  const kpi = (lab,val,note,cls='')=>`<div class="kpi ${cls}"><div class="lab">${lab}</div><div class="val">${val}</div><div class="note">${note}</div></div>`;
-  const lvl=(n)=>n>=5?'':n>=3?'warn':'bad';
+  let tone='', head;
+  if(r.cntHT===6) head='BioBuild wins every scenario with hourly pricing.';
+  else if(r.cntH===6) head=`BioBuild is cheaper in all 6 scenarios and meets the ${pct(s.savings,0)} target in ${r.cntHT} of 6.`;
+  else if(r.cntH>0){ tone='mid'; head=`BioBuild is cheaper in ${r.cntH} of 6 scenarios.`; }
+  else { tone='bad'; head='BioBuild is not cheaper in any scenario with these numbers.'; }
+  const lead=`Customers switch only if they save ${pct(s.savings,0)} or more versus the cheapest competitor. At ${money(s.rate)}/hr, BioBuild meets that in ${r.cntHT} of 6 hourly and ${r.cntFT} of 6 flat-fee scenarios, and still covers its ${money(s.opCost)}/hr cost in ${r.cntP} of 6.`;
+  const tile=(name,g)=>{ const prof=g.rec==='Flat fee'?g.expF.prof:g.expH.prof;
+    return `<div class="tile"><div class="lab">${name}</div><div class="big">${money(g.rate,2)}<small>/hr</small></div><div class="alt">or ${money(g.fee,2)} flat fee</div><div class="rec"><span class="pill ok">${g.rec}</span><span>expected profit ${money(prof,2)}</span></div></div>`; };
+  const kpi=(lab,val,cls='')=>`<div class="kpi ${cls}"><div class="lab">${lab}</div><div class="val" style="font-size:1.5rem">${val}</div></div>`;
+  const lvl=n=>n>=5?'':n>=3?'warn':'bad';
+  const rows=SC.map((n,i)=>`<tr><td>${n}</td><td>${money(r.cheap[i])}</td><td>${money(r.bbHourly[i])}</td><td class="${r.saveH[i]<0?'neg':''}">${pct(r.saveH[i])}</td><td>${pill(r.statH[i])}</td><td><b>${money(r.bestRate[i],2)}</b></td><td><b>${money(r.bestFlat[i],2)}</b></td></tr>`).join('');
   $('answer').innerHTML = `
-    <div class="verdict"><div class="vi">${icon}</div><div><h3>${head}</h3><p>${body}</p></div></div>
-    <div class="grid g2" style="margin-bottom:18px">
-      ${kpi('Hourly: cheaper in',`${r.cntH} / 6`,'scenarios vs. cheapest competitor',lvl(r.cntH))}
-      ${kpi('Flat fee: cheaper in',`${r.cntF} / 6`,'scenarios vs. cheapest competitor',lvl(r.cntF))}
-      ${kpi('Wins and profits in',`${r.cntP} / 6`,`best rate above ${money(s.opCost)}/hr cost`,lvl(r.cntP))}
-      ${kpi('Best hourly rate (simple, base)',`${money(r.bestRate[1],2)}/hr`,`or ${money(r.bestFlat[1])} flat · now ${money(s.rate)}/hr`)}
-    </div>
-    <div class="card" style="margin-bottom:0"><h3>Which price should BioBuild quote?</h3>
-      <p class="sub">The highest price that still leaves the customer with the savings target (base hours).</p>
-      <div class="tbl-wrap"><table><thead><tr><th></th><th>Simple task</th><th>Larger project</th></tr></thead><tbody>
-        <tr><td>Best hourly rate</td><td><b>${money(r.fvhS.rate,2)}/hr</b></td><td><b>${money(r.fvhL.rate,2)}/hr</b></td></tr>
-        <tr><td>Best flat fee</td><td><b>${money(r.fvhS.fee,2)}</b></td><td><b>${money(r.fvhL.fee,2)}</b></td></tr>
-        <tr><td>Recommended structure</td><td><span class="pill ok">${r.fvhS.rec}</span></td><td><span class="pill ok">${r.fvhL.rec}</span></td></tr>
-      </tbody></table></div></div>`;
+    <div class="card ans ${tone}"><h3>${head}</h3><p class="lead">${lead}</p>
+      <div class="lab" style="font-size:.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Best price to charge (base hours)</div>
+      <div class="grid g2">${tile('Simple task',r.fvhS)}${tile('Larger project',r.fvhL)}</div>
+      <div class="grid g3" style="margin-top:14px">
+        ${kpi('Hourly cheaper in',`${r.cntH} / 6`,lvl(r.cntH))}
+        ${kpi('Flat fee cheaper in',`${r.cntF} / 6`,lvl(r.cntF))}
+        ${kpi('Wins and profits in',`${r.cntP} / 6`,lvl(r.cntP))}
+      </div></div>
+    <div class="card" style="margin-bottom:0"><h3 style="margin-bottom:12px">All six scenarios</h3>
+      <div class="tbl-wrap"><table><thead><tr><th>Scenario</th><th>Competitor</th><th>BioBuild</th><th>Saves</th><th>Result</th><th>Best $/hr</th><th>Best flat</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 
 function renderCheapest(){
@@ -859,10 +828,10 @@ function openHow(){
     <p>Use <b>10%</b> or <b>15%</b> (left card or top bar), or <b>Custom</b> for any other number. Every result updates.</p>
     <h3>How to use it</h3>
     <ul>
-      <li><b>Left:</b> pick the savings target, BioBuild's rate, the competitors' rates and the flat fees. Use the "what if" slider to make competitors faster or slower.</li>
-      <li><b>Right:</b> the verdict and the best price to quote update as you change anything.</li>
-      <li><b>Below:</b> all six scenarios, the best price, flat fee vs hourly, and optional sensitivity maps.</li>
-      <li><b>Advanced assumptions</b> hold hours, scenario chances and table settings from the Excel file.</li>
+      <li><b>Left:</b> pick the savings target (10%, 15% or Custom), BioBuild's rate, and how fast the competitors are.</li>
+      <li><b>Right:</b> the best price to charge and all six scenarios update instantly.</li>
+      <li><b>Advanced assumptions:</b> competitor rates, flat fees, hours, scenario chances and table settings from the Excel file.</li>
+      <li><b>Flat fee vs. hourly, Sensitivity maps, Detailed breakdown:</b> open them for the deeper analysis.</li>
     </ul>
     <h3>Memory cue</h3>
     <p>Green = the customer saves enough. Yellow = cheaper but not enough. Red = BioBuild costs more.</p>
